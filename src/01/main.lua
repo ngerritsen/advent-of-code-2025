@@ -3,28 +3,27 @@ local str = require("src.utils.string")
 
 local data = file.read("input.txt")
 local lines = str.split(data, "\n")
+local SIZE = 100
 
 local function get_pass(per_click)
   local pos = 50
   local pass = 0
 
   for _, cmd in ipairs(lines) do
-    local dir, num = cmd:match("([LR])(%d+)")
-    local sign = dir == "L" and -1 or 1
+    local dir, n = cmd:match("([LR])(%d+)")
+    local prev = pos
+    local zero_passes = math.floor(math.abs(n) / SIZE)
+    local mod = n % SIZE
+    local next = dir == "L" and pos - mod or pos + mod
 
-    -- TODO: We can obviously do much better than this crap...
-    for _ = 1, num do
-      pos = pos + sign
-      pos = (pos % 100 + 100) % 100
+    pos = (next + SIZE) % SIZE
 
-      if per_click and pos == 0 then
-        pass = pass + 1
-      end
+    if next > SIZE or next < 0 and prev ~= 0 then
+      zero_passes = zero_passes + 1
     end
 
-    if not per_click and pos == 0 then
-      pass = pass + 1
-    end
+    if per_click then pass = pass + zero_passes end
+    if pos == 0 then pass = pass + 1 end
   end
 
   return pass
