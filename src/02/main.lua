@@ -4,32 +4,21 @@ local arr = require("src.utils.array")
 
 local data = file.read("input.txt")
 
-local function is_invalid(n, all)
+local function is_invalid(n)
+	local double = n .. n
+	local trimmed = string.sub(double, 2, -2)
+
+	return string.find(trimmed, n)
+end
+
+local function is_half_invalid(n)
 	local len = string.len(n)
-	local max = all and len or 2
 
-	for p = 2, max do
-		if len / p % 1 == 0 then
-			local s = math.floor(len / p)
-			local match = true
-			local first = string.sub(n, 1, s)
-
-			for i = s + 1, len, s do
-				local part = string.sub(n, i, i + s - 1)
-
-				if part ~= first then
-					match = false
-					break
-				end
-			end
-
-			if match then
-				return true
-			end
-		end
+	if len % 2 ~= 0 then
+		return false
 	end
 
-	return false
+	return string.sub(n, 1, len / 2) == string.sub(n, len / 2 + 1)
 end
 
 local function get_total_invalid(ranges, all)
@@ -37,7 +26,7 @@ local function get_total_invalid(ranges, all)
 
 	for _, range in ipairs(ranges) do
 		for n = range[1], range[2] do
-			if is_invalid(n, all) then
+			if all and is_invalid(n) or is_half_invalid(n) then
 				total = total + n
 			end
 		end
